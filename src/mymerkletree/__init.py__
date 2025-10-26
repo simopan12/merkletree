@@ -1,2 +1,0 @@
-from .merkle import MerkleTree
-__all__ = ["MerkleTree"]
