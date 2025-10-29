@@ -3,40 +3,42 @@ import math
 
 
 def merkletree(m,s):
-
-    if(len(m) <= 32): 
-        if(isinstance(m,str)):
-            return m
-        else:
-            return m.hex()
-
-    if(isinstance(m,bytearray) == False): m = bytearray(m,"utf-8")
-
-    if(isinstance(s,bytearray) == False): s = bytearray(s,"utf-8")
-        
     
     
-    l = math.ceil(math.log(len(m)/32,2))
+    
+    if isinstance(m, str):
+        m = m.encode()
+    if isinstance(s, str):
+        s = s.encode()
+    
+    
+    if len(m) <= 32:
+        return m
+    
+   
+    l = math.ceil(math.log2(len(m)/32))
     
 
-    for i in range(0,pow(2,1)*32 - len(m)):
-        m.append(0)
-
+    target_len=(2**l) * 32
     
-    out = bytearray()
+    m=m+ bytes(target_len - len(m))
 
-    for i in range (0,pow(2,l-1)):
+    out = b''
+    
+    num_blocks=2 **(l -1)
+
+    for i in range (num_blocks):
 
         message_to_hash = m[2*i*32 : 2*i*32 + 2*32]
-        #print(message_to_hash)
+        
 
         in_hash = s + message_to_hash
-        #print(in_hash)
+        
 
         out_hash = hashlib.shake_256(in_hash).digest(32)
-        #print(out_hash)
+        out+=out_hash
 
-        out = out + out_hash
+        
 
 
     return merkletree(out,s)
@@ -45,12 +47,19 @@ def merkletree(m,s):
 
 def main():
     
-    m="abcdefghijklmnopqrstuvwxyz1234567"
+    m="abcdefghijklmnopqrstuvwxyz123456177"
     s="abcdefghijklmnopqrstuvwxyz123456"
-
-    hash1 = merkletree(m,s)
+    final_hash=merkletree(m,s)
+    if len(m) <= 32:
+        try:
+            print("Final Merkle Tree hash (string):",final_hash.decode())
+        except UnicodeDecodeError:
+               print("Final Merkle Tree hash (hex):", final_hash.hex())
+    else :
+          print("Final Merkle Tree hash (hex):", final_hash.hex())
+                
     
-    print(hash1)
+    
 
     
 
